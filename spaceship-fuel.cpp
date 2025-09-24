@@ -12,7 +12,7 @@ class FuelTank {
         else return true;
     }
     bool canTravel (long long fuel_needed){
-        if (fuel_needed >= fuel) return false;
+        if (fuel_needed > fuel) return false;
         else return true;
     }
 
@@ -30,7 +30,6 @@ class FuelTank {
     }
     long long report (int x) {
         if (isFuelPositive() && x == 0){
-            std::cout << fuel << "\n";
             return fuel;
         } 
         else return -1;
@@ -46,14 +45,14 @@ int main() {
     FuelTank roket(initial_fuel);
     for (int i = 0; i < Q; ++i) {
         std::string operation;
-        int x;
+        long long x;
         std::cin >> operation >> x;
         if (operation == "REFUEL") {
             roket.refuel(x);
         } else if (operation == "TRAVEL") {
             roket.travel(x);
         } else if (operation == "REPORT") {
-            roket.report(x);
+            std::cout << roket.report(x) << std::endl;
         }
     }
     return 0;
