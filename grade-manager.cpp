@@ -4,112 +4,98 @@
 
 #include <iostream>
 #include <map>
-#include <string>
 #include <vector>
 
 using namespace std;
 
 class Student {
  private:
-  int id;
-  string name;
+  string id, nama;
   vector<int> grades;
+  int sumGrades;
 
  public:
-  Student(int student_id, const string& student_name)
-      : id(student_id), name(student_name) {}
-  int get_id() const {
+  Student() : id(""), nama(""), sumGrades(0) {}  // default constructor
+  Student(string id, string nama) : id(id), nama(nama), sumGrades(0) {}
+
+  void addGrade(int grade) {
+    grades.push_back(grade);
+    sumGrades += grade;
+  }
+  int getSumGrades() const {
+    return sumGrades;
+  }
+  string getId() const {
     return id;
   }
-
-  string get_name() const {
-    return name;
-  }
-
-  void add_grade(int grade) {
-    if(0 <= grade && grade <= 100) {
-      grades.push_back(grade);
-    }
-  }
-
-  double calculate_sum() const {
-    double s = 0;
-    for(int g : grades) s += g;
-    return s;
-  }
-
-  bool has_grades() const {
-    return !grades.empty();
+  string getNama() const {
+    return nama;
   }
 };
 
 class GradeManager {
  private:
-  vector<Student> students;
-  map<int, int> id_to_index;
+  map<string, Student> students;
 
  public:
-  void add_student(int id, const string& name) {
-    if(id_to_index.count(id)) return;
-    int sha = (int)students.size();
-    students.emplace_back(id, name);
-    id_to_index[id] = sha;
-  }
-
-  void add_grade(int id, int grade) {
-    auto it = id_to_index.find(id);
-    if(it == id_to_index.end()) return;
-    students[it->second].add_grade(grade);
-  }
-
-  void show_sum(int id) {
-    auto it = id_to_index.find(id);
-    if(it == id_to_index.end()) {
-      return;
+  void addStudent(const string& id, const string& nama) {
+    if(students.find(id) == students.end()) {
+      students[id] = Student(id, nama);
     }
-    const Student& student = students[it->second];
-    if(!student.has_grades()) {
-      cout << "No grades available.\n";
-      return;
-    }
-    cout << student.get_name() << ": " << student.calculate_sum() << "\n";
   }
-
-  void list_all_students() {
-    for(const Student& student : students) {
-      cout << student.get_name() << ": " << student.calculate_sum() << "\n";
+  void addGrade(const string& id, int grade) {
+    if(students.find(id) != students.end() && grade >= 0 && grade <= 100) {
+      students[id].addGrade(grade);
     }
+  }
+  int getSumGrades(const string& id) const {
+    if(students.find(id) != students.end()) {
+      return students.at(id).getSumGrades();
+    }
+    return -1;
+  }
+  void listStudents() const {
+    for(const auto& pair : students) {
+      cout << pair.second.getNama() << ": " << pair.second.getSumGrades()
+           << "\n";
+    }
+  }
+  string getStudentName(const string& id) const {
+    if(students.find(id) != students.end()) {
+      return students.at(id).getNama();
+    }
+    return "";
   }
 };
 
 int main() {
   ios::sync_with_stdio(false);
   cin.tie(nullptr);
-
   int Q;
   cin >> Q;
-
-  GradeManager manager;
+  GradeManager gm;
   for(int i = 0; i < Q; i++) {
     string operation;
     cin >> operation;
-
-    string run = operation;
-    if(run == "ADD") {
-      int id;
-      string name;
-      cin >> id >> name;
-      manager.add_student(id, name);
-    } else if(run == "GRADE") {
-      int id, grade;
+    if(operation == "ADD") {
+      string id, nama;
+      cin >> id >> nama;
+      gm.addStudent(id, nama);
+    } else if(operation == "GRADE") {
+      string id;
+      int grade;
       cin >> id >> grade;
-      manager.add_grade(id, grade);
-    } else if(run == "SUM") {
-      int id;
+      gm.addGrade(id, grade);
+    } else if(operation == "SUM") {
+      string id;
       cin >> id;
-      manager.show_sum(id);
-    } else if(run == "LIST") {
-      manager.list_all_students();
+      int sum = gm.getSumGrades(id);
+      if(sum > 0) {
+        cout << gm.getStudentName(id) << ": " << sum << "\n";
+      }
+
+    } else if(operation == "LIST") {
+      gm.listStudents();
     }
   }
   return 0;
